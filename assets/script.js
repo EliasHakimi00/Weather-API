@@ -54,3 +54,74 @@ function fiveDayForecast(data) {
 }
 
 // Current forecast function
+function currentForeCast(city) {
+    var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + 
+                    city + "&appid=" + apiKey;
+    $.ajax({
+        url: queryURL,
+        method: "GET",
+    })
+    .then(function (data) {
+
+        console.log(data);
+        $("#current-city-forecast").empty();
+
+        var cityName = data.name;
+        var date = moment().format("MMM Do YYYY");
+        var icon = data.weather[0].icon;
+        var temperature = data.main.temp;
+        var fahrenheit = ((temperature - 273.15) * 1.80 + 32).toFixed(2);
+        var wind = data.wind.speed;
+        var humidity = data.main.humidity;
+
+        var appendBlock = 
+            `<div class="card>
+                <div class="card-body">
+                    <h4 class="card-title">${cityName} Today</h4>
+                    <h4 class="card-title">${date}
+                        <img src="https://openweathermap.org/img/w/${icon}.png"></img>
+                    </h4>
+                    <p class="card-text current-temp">Temperature: ${fahrenheit}°F</p>
+                    <p class="card-text current-wind">Wind Speed: ${wind}MPH</p>
+                    <p class="card-text current-humidity">Humidity: ${humidity}%</p>
+                    <p class="card-text current-uv"></p>
+                </div>
+            </div>`;
+
+        $("#current-city-forecast").append(appendBlock);
+
+        var latitude = data.coord.lat;
+        var longitude = data.coord.lon;
+        var uvURL = "https://api.openweathermap.org/data/2.5/uvi/forecast?&units=imperial&appid="
+                     + apiKey
+                     + "&q=&lat="
+                     + latitude
+                     + "&lon="
+                     + longitude;
+        $.ajax({
+            url: uvURL,
+            method: "GET", 
+        })
+        .then(function (data) {
+            //var uvIndexDisplay = $("<button>");
+            console.log(data);
+            var uvValue = data[0].value;
+            var appendBlock = ``;
+
+            if (uvValue > 8.5) {
+                appendBlock = 
+                    `<button class="btn btn-danger">UV Index: ${uvValue}</button>`;
+            } else if (uvValue > 5) {
+                appendBlock = 
+                    `<button class="btn btn-warning">UV Index: ${uvValue}</button>`;
+            } else {
+                appendBlock = 
+                    `<button class="btn btn-success">UV Index: ${uvValue}</button>`;
+            }
+            
+            $(".current-uv").append(appendBlock);
+        })
+    })                
+}
+
+
